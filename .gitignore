@@ -6,6 +6,12 @@ build/
 # Local SDK
 local.properties
 
+# Local reproducible toolchain (JDK, Gradle, Android SDK used for baseline verification)
+.toolchain/
+
+# CI-generated debug keystore
+ci-signing/
+
 # IDE
 .idea/
 *.iml

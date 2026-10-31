@@ -1,0 +1,36 @@
+package com.reed.fcmguard
+
+import android.content.Context
+import android.content.Intent
+
+/**
+ * Best-effort FCM/MCS reconnect kick without ADB, Shizuku or root.
+ * Mirrors the heartbeat intents used by HeartbeatFixerForFCM.
+ *
+ * Broadcasts are package-scoped and are only sent after a real repair or an
+ * explicit user request.
+ */
+object FcmReconnect {
+    private const val ACTION_GTALK_HEARTBEAT = "com.google.android.intent.action.GTALK_HEARTBEAT"
+    private const val ACTION_MCS_HEARTBEAT = "com.google.android.intent.action.MCS_HEARTBEAT"
+
+    private val TARGET_PACKAGES = arrayOf(
+        "com.google.android.gms",
+        "com.google.android.gsf"
+    )
+
+    @JvmStatic
+    fun kick(context: Context): Boolean {
+        var sent = false
+        for (target in TARGET_PACKAGES) {
+            try {
+                context.sendBroadcast(Intent(ACTION_GTALK_HEARTBEAT).setPackage(target))
+                context.sendBroadcast(Intent(ACTION_MCS_HEARTBEAT).setPackage(target))
+                sent = true
+            } catch (_: Throwable) {
+                // Best-effort only: a blocked or missing target must not abort the other.
+            }
+        }
+        return sent
+    }
+}

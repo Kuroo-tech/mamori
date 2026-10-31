@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FCM Guard</string>
+    <string name="app_name">Mamori</string>
     <string name="subtitle">HyperOS&#x5411;&#x3051;&#x4F4E;&#x6D88;&#x8CBB;&#x96FB;&#x529B;FCM&#x4FDD;&#x8B77;</string>
     <string name="label_key">&#x8A2D;&#x5B9A;&#x30AD;&#x30FC;</string>
     <string name="label_item">&#x5FC5;&#x9808;&#x9805;&#x76EE;</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">FCM Guard</string>
+    <string name="app_name">Mamori</string>
     <string name="subtitle">Protección FCM de bajo consumo para HyperOS</string>
     <string name="label_key">Clave de ajustes</string>
     <string name="label_item">Elemento requerido</string>

@@ -1,5 +1,6 @@
 plugins {
-    id 'com.android.application'
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -9,7 +10,11 @@ android {
     defaultConfig {
         applicationId "com.reed.fcmguard"
         minSdk 21
+        // Load-bearing: the vendor Settings.System whitelist write requires the legacy
+        // target SDK code path. Do not raise this without replacing the write mechanism.
         targetSdk 22
+        // Kept in this exact Groovy form: .github/workflows/build-apk.yml parses
+        // versionName with sed to derive the release tag.
         versionCode 30
         versionName "1.5.9"
     }
@@ -36,4 +41,18 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
+    testOptions {
+        unitTests.includeAndroidResources = false
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+dependencies {
+    testImplementation libs.junit
 }
