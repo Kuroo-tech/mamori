@@ -6,7 +6,13 @@
   <img src="docs/icon.svg" width="180" alt="FCM Guard icon" />
 </p>
 
-# FCM Guard for HyperOS
+# Mamori
+
+**Mamori is a modernized fork of [FCM Guard for HyperOS](https://github.com/ReedGAOOO/FCMGuard-HyperOS).**
+
+The upstream FCM protection mechanism is preserved unchanged; this fork rebuilds the application around Kotlin and Material 3 and adds Vietnamese as a first-class locale. The application ID stays `com.reed.fcmguard` so existing installs upgrade in place. The documentation below describes the upstream behavior that Mamori inherits.
+
+---
 
 **A lightweight, no-root watchdog for HyperOS 3 China ROM that keeps Google Play services in Xiaomi's no-restrict background list so FCM push stays reliable.**
 
