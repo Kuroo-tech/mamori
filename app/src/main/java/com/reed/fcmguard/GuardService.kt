@@ -40,7 +40,7 @@ class GuardService : Service() {
         super.onCreate()
         applyExecutionMode()
         registerObserver()
-        SettingsGuard.rememberCurrentValue(this)
+        Operations.primeFallbackAsync(this)
         handler.post(fallbackCheck)
     }
 

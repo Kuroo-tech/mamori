@@ -21,6 +21,12 @@ object Operations {
     }
     private val main = Handler(Looper.getMainLooper())
 
+    /**
+     * True while this process is between journal.start and a terminal state. Used only to
+     * tell an in-flight operation apart from one left behind by a dead process.
+     */
+    private val inFlight = java.util.concurrent.atomic.AtomicBoolean(false)
+
     fun interface RepairCallback {
         fun onResult(outcome: RepairOutcome)
     }
@@ -33,7 +39,7 @@ object Operations {
     fun repairAsync(context: Context, confirmEmptyWhitelist: Boolean, callback: RepairCallback) {
         val app = context.applicationContext
         executor.execute {
-            val outcome = repairBlocking(app, confirmEmptyWhitelist)
+            val outcome = tracked { repairBlocking(app, confirmEmptyWhitelist) }
             main.post { callback.onResult(outcome) }
         }
     }
@@ -42,8 +48,24 @@ object Operations {
     fun restoreAsync(context: Context, snapshotId: String, callback: RestoreCallback) {
         val app = context.applicationContext
         executor.execute {
-            val outcome = restoreBlocking(app, snapshotId)
+            val outcome = tracked { restoreBlocking(app, snapshotId) }
             main.post { callback.onResult(outcome) }
+        }
+    }
+
+    /** Seeds the repair fallback from the current value, off the main thread. */
+    @JvmStatic
+    fun primeFallbackAsync(context: Context) {
+        val app = context.applicationContext
+        executor.execute { SettingsGuard.rememberCurrentValue(app) }
+    }
+
+    private inline fun <T> tracked(block: () -> T): T {
+        inFlight.set(true)
+        try {
+            return block()
+        } finally {
+            inFlight.set(false)
         }
     }
 
@@ -78,9 +100,13 @@ object Operations {
     fun latestSnapshot(context: Context): Snapshot? =
         snapshots(context).latestFor(SettingsGuard.getConfiguredKey(context))
 
-    /** A non-terminal record left behind by a previous process. Never cleared silently. */
+    /**
+     * A non-terminal record left behind by a previous process. Never cleared silently.
+     * An operation running right now is not an interrupted one, so it is not reported.
+     */
     @JvmStatic
-    fun pendingInterrupted(context: Context): OperationRecord? = journal(context).active()
+    fun pendingInterrupted(context: Context): OperationRecord? =
+        if (inFlight.get()) null else journal(context).active()
 
     /** Explicit user action: records the leftover as interrupted and clears the blocker. */
     @JvmStatic
