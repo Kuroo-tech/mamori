@@ -8,7 +8,7 @@ import org.junit.Test
 /**
  * Locks down the preserve/append rules for the HyperOS whitelist value. These are the
  * rules that must never silently change: existing packages keep their order, nothing
- * is removed, and the required item is appended only when missing.
+ * is removed, the required item is appended only when missing, and nothing is invented.
  */
 class PackageListTest {
 
@@ -52,8 +52,7 @@ class PackageListTest {
         val repaired = PackageList.buildRepaired(
             current = "com.vendor.one,com.vendor.two",
             lastGood = null,
-            required = "com.google.android.gms",
-            emptySeeds = listOf("seed.a")
+            required = "com.google.android.gms"
         )
         assertEquals(
             listOf("com.vendor.one", "com.vendor.two", "com.google.android.gms"),
@@ -66,13 +65,9 @@ class PackageListTest {
         val repaired = PackageList.buildRepaired(
             current = "com.a,com.google.android.gms,com.b",
             lastGood = null,
-            required = "com.google.android.gms",
-            emptySeeds = emptyList()
+            required = "com.google.android.gms"
         )
-        assertEquals(
-            listOf("com.a", "com.google.android.gms", "com.b"),
-            repaired.toList()
-        )
+        assertEquals(listOf("com.a", "com.google.android.gms", "com.b"), repaired.toList())
     }
 
     @Test
@@ -80,38 +75,24 @@ class PackageListTest {
         val fromLastGood = PackageList.buildRepaired(
             current = null,
             lastGood = "com.last.good",
-            required = "com.google.android.gms",
-            emptySeeds = listOf("seed.a")
+            required = "com.google.android.gms"
         )
         assertEquals(listOf("com.last.good", "com.google.android.gms"), fromLastGood.toList())
 
         val fromCurrent = PackageList.buildRepaired(
             current = "com.live",
             lastGood = "com.last.good",
-            required = "com.google.android.gms",
-            emptySeeds = emptyList()
+            required = "com.google.android.gms"
         )
         assertEquals(listOf("com.live", "com.google.android.gms"), fromCurrent.toList())
     }
 
     @Test
-    fun `buildRepaired uses explicit seeds only when both sources are empty`() {
+    fun `buildRepaired invents nothing when both sources are empty`() {
         val repaired = PackageList.buildRepaired(
             current = null,
             lastGood = null,
-            required = "com.google.android.gms",
-            emptySeeds = listOf("seed.a", "seed.b")
-        )
-        assertEquals(listOf("seed.a", "seed.b", "com.google.android.gms"), repaired.toList())
-    }
-
-    @Test
-    fun `buildRepaired never invents packages when no seeds are supplied`() {
-        val repaired = PackageList.buildRepaired(
-            current = "",
-            lastGood = null,
-            required = "com.google.android.gms",
-            emptySeeds = emptyList()
+            required = "com.google.android.gms"
         )
         assertEquals(listOf("com.google.android.gms"), repaired.toList())
     }
@@ -121,8 +102,7 @@ class PackageListTest {
         val repaired = PackageList.buildRepaired(
             current = "com.a",
             lastGood = null,
-            required = "  com.google.android.gms  ",
-            emptySeeds = emptyList()
+            required = "  com.google.android.gms  "
         )
         assertEquals(listOf("com.a", "com.google.android.gms"), repaired.toList())
     }
@@ -132,8 +112,7 @@ class PackageListTest {
         val repaired = PackageList.buildRepaired(
             current = "com.a",
             lastGood = null,
-            required = "   ",
-            emptySeeds = emptyList()
+            required = "   "
         )
         assertEquals(listOf("com.a"), repaired.toList())
     }
@@ -143,8 +122,7 @@ class PackageListTest {
         val repaired = PackageList.buildRepaired(
             current = "com.b,com.a",
             lastGood = null,
-            required = "com.google.android.gms",
-            emptySeeds = emptyList()
+            required = "com.google.android.gms"
         )
         val joined = PackageList.join(repaired)
         assertEquals(joined, PackageList.join(PackageList.parse(joined)))

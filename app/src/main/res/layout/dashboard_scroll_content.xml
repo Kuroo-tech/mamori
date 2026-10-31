@@ -36,6 +36,7 @@
             <Button android:id="@+id/diagBtn" android:layout_width="0dp" android:layout_height="48dp" android:layout_weight="1" android:text="@string/open_fcm_diag" android:textAllCaps="false" android:textColor="@color/text_primary" android:textSize="13sp" android:background="@drawable/secondary_button_bg" android:elevation="0dp" android:stateListAnimator="@null" />
         </LinearLayout>
         <Button android:id="@+id/permissionBtn" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="8dp" android:text="@string/grant_modify" android:textAllCaps="false" android:textColor="@color/blue" android:textStyle="bold" android:background="@drawable/secondary_button_bg" android:elevation="0dp" android:stateListAnimator="@null" />
+        <Button android:id="@+id/restoreBtn" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="8dp" android:text="@string/restore_previous_value" android:textAllCaps="false" android:textColor="@color/text_primary" android:textSize="13sp" android:background="@drawable/secondary_button_bg" android:elevation="0dp" android:stateListAnimator="@null" />
     </LinearLayout>
 
     <LinearLayout

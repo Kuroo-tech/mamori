@@ -53,6 +53,32 @@
     <string name="write_rejected">System rejected the write</string>
     <string name="write_failed">Write failed: %1$s</string>
 
+    <!-- Verified operations, snapshots and recovery -->
+    <string name="result_applied">Repaired and verified</string>
+    <string name="result_confirmation_required">Whitelist is empty — confirmation needed</string>
+    <string name="result_snapshot_failed">Not changed: no backup could be saved (%1$s)</string>
+    <string name="result_read_failed">Could not read the current value (%1$s)</string>
+    <string name="result_unverified">Write could not be verified — the value may not have changed</string>
+    <string name="result_recovery_required">An earlier change did not finish — recovery needed</string>
+
+    <string name="restore_previous_value">Restore previous value</string>
+    <string name="restore_dialog_title">Restore previous value?</string>
+    <string name="restore_dialog_message">Exact whitelist saved before the last change.\n\nKey: %1$s\nSaved: %2$s\nPackages: %3$d\n\nThe current value is backed up first, so this restore can itself be undone.</string>
+    <string name="restore_confirm">Restore</string>
+    <string name="restore_done">Previous value restored and verified</string>
+    <string name="restore_none">No saved value for this key yet</string>
+    <string name="restore_corrupt">The saved copy failed its integrity check and was not used</string>
+    <string name="restore_unverified">Restore could not be verified — the value may not have changed</string>
+
+    <string name="empty_whitelist_title">Whitelist is empty</string>
+    <string name="empty_whitelist_message">The whitelist is currently empty, so Mamori will not invent packages.\n\nOnly %1$s will be added. Every other app stays unlisted.</string>
+    <string name="empty_whitelist_confirm">Add %1$s</string>
+
+    <string name="recovery_title">An earlier change did not finish</string>
+    <string name="recovery_message">Mamori stopped during a change and will not repair anything automatically.\n\nStarted: %1$s\nLast state: %2$s\nKey: %3$s</string>
+    <string name="recovery_restore">Restore saved value</string>
+    <string name="recovery_dismiss">Dismiss</string>
+
     <string name="notification_channel_name">FCM Guard protection</string>
     <string name="notification_channel_description">Low-priority notification used to keep automatic FCM protection reliable</string>
     <string name="notification_active">Protection active · event-driven</string>

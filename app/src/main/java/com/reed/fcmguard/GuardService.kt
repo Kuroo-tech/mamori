@@ -15,6 +15,9 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
+import com.reed.fcmguard.execution.Operations
+import com.reed.fcmguard.execution.OutcomeText
+import com.reed.fcmguard.execution.RepairOutcome
 
 class GuardService : Service() {
     // v2 intentionally uses a new channel id. Android does not allow an app to raise
@@ -22,21 +25,22 @@ class GuardService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private var observer: ContentObserver? = null
     private var foreground = false
+    private var repairing = false
 
     private val fallbackCheck = object : Runnable {
         override fun run() {
-            repair(notifyFailure = false)
+            requestRepair(notifyFailure = false)
             handler.postDelayed(this, FALLBACK_INTERVAL_MS)
         }
     }
 
-    private val repairDebounced = Runnable { repair(notifyFailure = true) }
+    private val repairDebounced = Runnable { requestRepair(notifyFailure = true) }
 
     override fun onCreate() {
         super.onCreate()
         applyExecutionMode()
         registerObserver()
-        SettingsGuard.rememberIfUseful(this)
+        SettingsGuard.rememberCurrentValue(this)
         handler.post(fallbackCheck)
     }
 
@@ -49,13 +53,32 @@ class GuardService : Service() {
         return START_STICKY
     }
 
-    private fun repair(notifyFailure: Boolean) {
-        val result = SettingsGuard.repair(this)
-        if (result.changed) {
-            FcmReconnect.kick(this)
-            if (foreground) refreshNotification(getString(R.string.notification_repaired))
-        } else if (!result.success && notifyFailure && foreground) {
-            refreshNotification(result.message)
+    /**
+     * Privileged work runs on the serialized background executor, never on this handler.
+     * A repair already in flight suppresses overlapping requests instead of queueing them.
+     */
+    private fun requestRepair(notifyFailure: Boolean) {
+        if (repairing) return
+        repairing = true
+        Operations.repairAsync(this, confirmEmptyWhitelist = false) { outcome ->
+            repairing = false
+            handleOutcome(outcome, notifyFailure)
+        }
+    }
+
+    private fun handleOutcome(outcome: RepairOutcome, notifyFailure: Boolean) {
+        when (outcome) {
+            is RepairOutcome.Applied -> {
+                FcmReconnect.kick(this)
+                if (foreground) refreshNotification(getString(R.string.notification_repaired))
+            }
+            // Expected states that need no background noise: the dashboard explains them.
+            RepairOutcome.AlreadyCorrect,
+            is RepairOutcome.ConfirmationRequired,
+            is RepairOutcome.RecoveryRequired -> Unit
+            else -> if (notifyFailure && foreground) {
+                refreshNotification(OutcomeText.repair(this, outcome))
+            }
         }
     }
 

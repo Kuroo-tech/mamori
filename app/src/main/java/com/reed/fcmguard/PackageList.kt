@@ -35,22 +35,19 @@ internal object PackageList {
      * Builds the value a repair should write.
      *
      * Preserve-then-append only: existing packages keep their order and are never
-     * removed, the required item is appended when missing, and [emptySeeds] are used
-     * only when both the live value and the last-known-good snapshot are empty.
+     * removed, the required item is appended when missing, and the last known-good
+     * value is used only when the live value has no packages at all.
      *
-     * [emptySeeds] exists to preserve upstream behavior exactly. Inventing packages
-     * for an empty whitelist is unsafe and is scheduled for replacement in Phase 2;
-     * callers must pass an explicit list rather than relying on hidden defaults.
+     * Nothing is invented. If both sources are empty, the result is just the required
+     * item, and the caller is responsible for asking the user first.
      */
     fun buildRepaired(
         current: String?,
         lastGood: String?,
-        required: String?,
-        emptySeeds: List<String>
+        required: String?
     ): LinkedHashSet<String> {
         val packages = parse(current)
         if (packages.isEmpty()) packages.addAll(parse(lastGood))
-        if (packages.isEmpty()) packages.addAll(emptySeeds)
         if (!required.isNullOrBlank()) packages.add(required.trim())
         return packages
     }

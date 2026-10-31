@@ -36,6 +36,15 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.reed.fcmguard.execution.OperationRecord;
+import com.reed.fcmguard.execution.Operations;
+import com.reed.fcmguard.execution.OutcomeText;
+import com.reed.fcmguard.execution.RepairOutcome;
+import com.reed.fcmguard.execution.RestoreOutcome;
+import com.reed.fcmguard.execution.Snapshot;
+
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends Activity {
@@ -64,6 +73,8 @@ public class MainActivity extends Activity {
     private boolean suppressAppearanceCallbacks = false;
     private boolean notificationAccessPending = false;
     private boolean fcmListExpanded = false;
+    private boolean operationInFlight = false;
+    private boolean recoveryDialogShown = false;
     private List<FcmAppScanner.AppEntry> scannedFcmApps;
 
     private final Handler languageAnimationHandler = new Handler(Looper.getMainLooper());
@@ -107,6 +118,7 @@ public class MainActivity extends Activity {
         setupSwitches();
         bindActions();
         refreshStatus(null);
+        checkInterruptedOperation();
     }
 
     @Override protected void onResume() {
@@ -294,9 +306,8 @@ public class MainActivity extends Activity {
                     ensurePersistentNotificationAccess();
                 }
                 startProtectionService();
-                SettingsGuard.Result result = SettingsGuard.repair(this);
-                if (result.changed) FcmReconnect.kick(this);
                 toast(getString(R.string.service_started));
+                requestRepair(false);
             } else {
                 stopService(new Intent(this, GuardService.class));
                 SettingsGuard.setProtectionEnabled(this, false);
@@ -332,10 +343,10 @@ public class MainActivity extends Activity {
 
         findViewById(R.id.repairBtn).setOnClickListener(v -> {
             SettingsGuard.saveConfig(this, keyEdit.getText().toString(), itemEdit.getText().toString());
-            SettingsGuard.Result result = SettingsGuard.repair(this);
-            if (result.changed) FcmReconnect.kick(this);
-            refreshStatus(result.message);
+            requestRepair(false);
         });
+
+        findViewById(R.id.restoreBtn).setOnClickListener(v -> requestRestore(null));
 
         findViewById(R.id.wakeBtn).setOnClickListener(v -> {
             FcmReconnect.kick(this);
@@ -350,6 +361,135 @@ public class MainActivity extends Activity {
                 toast(getString(R.string.autostart_manager_unavailable));
             }
         });
+    }
+
+    /**
+     * Privileged work never runs on the UI thread. The engine is asked for confirmation
+     * instead of inventing packages when the whitelist is empty.
+     */
+    private void requestRepair(boolean confirmEmptyWhitelist) {
+        if (operationInFlight) return;
+        operationInFlight = true;
+        Operations.repairAsync(this, confirmEmptyWhitelist, this::handleRepairOutcome);
+    }
+
+    private void handleRepairOutcome(RepairOutcome outcome) {
+        operationInFlight = false;
+        if (outcome instanceof RepairOutcome.Applied) {
+            FcmReconnect.kick(this);
+            refreshStatus(getString(R.string.result_applied));
+        } else if (outcome instanceof RepairOutcome.ConfirmationRequired) {
+            refreshStatus(null);
+            showEmptyWhitelistDialog((RepairOutcome.ConfirmationRequired) outcome);
+        } else if (outcome instanceof RepairOutcome.RecoveryRequired) {
+            refreshStatus(null);
+            recoveryDialogShown = true;
+            showRecoveryDialog(((RepairOutcome.RecoveryRequired) outcome).getPending());
+        } else {
+            refreshStatus(OutcomeText.repair(this, outcome));
+        }
+    }
+
+    private void showEmptyWhitelistDialog(RepairOutcome.ConfirmationRequired required) {
+        String item = required.getRequiredItem();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.empty_whitelist_title)
+                .setMessage(getString(R.string.empty_whitelist_message, item))
+                .setPositiveButton(
+                        getString(R.string.empty_whitelist_confirm, item),
+                        (dialog, which) -> requestRepair(true))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void requestRestore(String snapshotId) {
+        if (snapshotId != null && !snapshotId.isEmpty()) {
+            runRestore(snapshotId);
+            return;
+        }
+        Snapshot latest = Operations.latestSnapshot(this);
+        if (latest == null) {
+            toast(getString(R.string.restore_none));
+            return;
+        }
+        showRestoreDialog(latest);
+    }
+
+    private void showRestoreDialog(Snapshot latest) {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.restore_dialog_title)
+                .setMessage(getString(
+                        R.string.restore_dialog_message,
+                        latest.getKey(),
+                        formatTime(latest.getCreatedAt()),
+                        packageCount(latest.getValue())))
+                .setPositiveButton(R.string.restore_confirm, (dialog, which) -> runRestore(latest.getId()))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void runRestore(String snapshotId) {
+        if (operationInFlight) return;
+        operationInFlight = true;
+        Operations.restoreAsync(this, snapshotId, this::handleRestoreOutcome);
+    }
+
+    private void handleRestoreOutcome(RestoreOutcome outcome) {
+        operationInFlight = false;
+        String message = OutcomeText.restore(this, outcome);
+        if (outcome instanceof RestoreOutcome.Restored) {
+            FcmReconnect.kick(this);
+        }
+        refreshStatus(message);
+    }
+
+    /** A leftover non-terminal operation means an earlier run died mid-write. Ask, never guess. */
+    private void checkInterruptedOperation() {
+        if (recoveryDialogShown) return;
+        OperationRecord pending = Operations.pendingInterrupted(this);
+        if (pending == null) return;
+        recoveryDialogShown = true;
+        showRecoveryDialog(pending);
+    }
+
+    private void showRecoveryDialog(OperationRecord pending) {
+        String snapshotId = pending.getSnapshotId();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.recovery_title)
+                .setMessage(getString(
+                        R.string.recovery_message,
+                        formatTime(pending.getStartedAt()),
+                        pending.getState().name(),
+                        pending.getKey()))
+                .setNegativeButton(R.string.recovery_dismiss, (dialog, which) -> {
+                    Operations.dismissInterrupted(this);
+                    refreshStatus(null);
+                })
+                .setOnCancelListener(dialog -> {
+                    Operations.dismissInterrupted(this);
+                    refreshStatus(null);
+                });
+
+        if (snapshotId != null && !snapshotId.isEmpty()) {
+            builder.setPositiveButton(R.string.recovery_restore, (dialog, which) -> {
+                Operations.dismissInterrupted(this);
+                runRestore(snapshotId);
+            });
+        }
+        builder.show();
+    }
+
+    private String formatTime(long epochMillis) {
+        return DateFormat.getDateTimeInstance().format(new Date(epochMillis));
+    }
+
+    private int packageCount(String value) {
+        if (value == null) return 0;
+        int count = 0;
+        for (String part : value.split(",")) {
+            if (!part.trim().isEmpty()) count++;
+        }
+        return count;
     }
 
     private void toggleFcmAppsList() {
