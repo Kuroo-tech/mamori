@@ -1,6 +1,6 @@
 # Mamori — Implementation Plan (post-audit)
 
-Status: **Phase 0 complete. Phase 1 in progress (foundation landed).**
+Status: **Phase 0, 1 and 2 complete. Next: Phase 3 (Material 3 Expressive UI).**
 Source of truth for current behavior: [`REPOSITORY_AUDIT.md`](REPOSITORY_AUDIT.md). Current structure: [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ### Decisions taken
@@ -15,7 +15,23 @@ Source of truth for current behavior: [`REPOSITORY_AUDIT.md`](REPOSITORY_AUDIT.m
 
 Landed: Kotlin plugin + version catalog, `android.useAndroidX=true`, 9 of 12 classes converted to Kotlin, pure logic extracted into `PackageList`/`LocaleTag`, 19 JVM unit tests, Mamori rename, `.toolchain/` and `ci-signing/` gitignored.
 
-Still open in Phase 1: repository interface + fake (Phase 2 needs it), remaining Java (`MainActivity`, `StickyDashboardLayout`, `CollapsingStatusCard`) — deliberately deferred to the Phase 3 rewrite rather than converted twice.
+Still open in Phase 1: remaining Java (`MainActivity`, `StickyDashboardLayout`, `CollapsingStatusCard`) — deliberately deferred to the Phase 3 rewrite rather than converted twice.
+
+### Phase 2 status (complete)
+
+Landed: `SystemSettingsGateway` + `RepairEngine` (snapshot → write → read-back), `SnapshotStore` with SHA-256 integrity and retention, `OperationJournal` persisted state machine with interruption detection, `Operations` (serialized background executor, main-thread callbacks), `OutcomeText`, three dialogs and a restore action in the existing UI. Fabricated whitelist seeds removed. 52 JVM tests, 0 failures.
+
+Contract and limits: [`BACKUP_AND_ROLLBACK.md`](BACKUP_AND_ROLLBACK.md).
+
+Exit criteria:
+
+| Criterion | State |
+| --- | --- |
+| Every write verified by read-back; failures surface as failures | Met in code and unit tests; on-device behavior unverified (no device attached). |
+| Restoring a snapshot is a shipped, tested feature | Met: `restore` action, confirmation dialog, digest check, pre-restore snapshot. |
+| Killing the process mid-operation is detectable and user-confirmable, never silent | Met: journal blocks repair with `RecoveryRequired` until the user chooses restore or dismiss. |
+
+Not done in Phase 2, carried forward: history/diagnostics screen (Phase 4), Compose UI (Phase 3), FCM scan off the main thread (Phase 3 item 4).
 
 Deviations from the original plan, and why:
 
@@ -75,7 +91,7 @@ Exit criteria
 
 ---
 
-## 3. Phase 2 — Execution abstraction, verified operations, snapshot/restore
+## 3. Phase 2 — Execution abstraction, verified operations, snapshot/restore ✅
 
 *The genuine safety upgrade. This is where spec §7 becomes real for the setting Mamori actually modifies.*
 
