@@ -15,6 +15,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.provider.Settings
+import com.reed.fcmguard.core.log.MamoriLog
 import com.reed.fcmguard.execution.Operations
 import com.reed.fcmguard.execution.OutcomeText
 import com.reed.fcmguard.execution.RepairOutcome
@@ -38,6 +39,8 @@ class GuardService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        MamoriLog.attach(applicationContext)
+        MamoriLog.info(TAG, "service created")
         applyExecutionMode()
         registerObserver()
         Operations.primeFallbackAsync(this)
@@ -76,8 +79,11 @@ class GuardService : Service() {
             RepairOutcome.AlreadyCorrect,
             is RepairOutcome.ConfirmationRequired,
             is RepairOutcome.RecoveryRequired -> Unit
-            else -> if (notifyFailure && foreground) {
-                refreshNotification(OutcomeText.repair(this, outcome))
+            else -> {
+                MamoriLog.warn(TAG, "background repair failed: ${outcome::class.simpleName}")
+                if (notifyFailure && foreground) {
+                    refreshNotification(OutcomeText.repair(this, outcome))
+                }
             }
         }
     }
@@ -162,6 +168,7 @@ class GuardService : Service() {
     }
 
     companion object {
+        private const val TAG = "GuardService"
         private const val CHANNEL_ID = "fcm_guard_persistent_v2"
         private const val NOTIFICATION_ID = 426
         private const val FALLBACK_INTERVAL_MS = 30L * 60L * 1000L

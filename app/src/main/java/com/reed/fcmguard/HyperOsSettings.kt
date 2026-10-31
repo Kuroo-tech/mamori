@@ -5,9 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import com.reed.fcmguard.core.log.MamoriLog
 
 /** HyperOS/MIUI settings deep links with safe Android fallbacks. */
 object HyperOsSettings {
+    private const val TAG = "HyperOsSettings"
 
     @JvmStatic
     fun openAutoStartManager(context: Context): Boolean {
@@ -48,12 +50,32 @@ object HyperOsSettings {
         return launch(context, details)
     }
 
+    /** The system language screen, used when a change needs the platform's own UI. */
+    @JvmStatic
+    fun openSystemLanguageSettings(context: Context): Boolean =
+        launch(context, Intent(Settings.ACTION_LOCALE_SETTINGS))
+
+    /**
+     * App info. On Android 13+ this is where the per-app language screen lives; there is no
+     * public deep link straight to it, so app info is the honest destination.
+     */
+    @JvmStatic
+    fun openAppInfo(context: Context, packageName: String): Boolean {
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.parse("package:$packageName")
+        )
+        intent.addCategory(Intent.CATEGORY_DEFAULT)
+        return launch(context, intent)
+    }
+
     private fun launch(context: Context, intent: Intent): Boolean {
         return try {
             if (intent.resolveActivity(context.packageManager) == null) return false
             context.startActivity(intent)
             true
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
+            MamoriLog.warnOnce("hyperos-launch-${intent.action}", TAG, "settings intent failed", t)
             false
         }
     }

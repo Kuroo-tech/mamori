@@ -48,12 +48,14 @@ class LocaleTagTest {
     }
 
     /**
-     * Documents current upstream behavior. Vietnamese becomes a supported locale in
-     * Phase 4 (values-vi + locales_config + this mapping); this assertion is expected
-     * to change then, deliberately and not silently.
+     * Vietnamese became a supported locale in Phase 4. This replaced the Phase 1 assertion
+     * that it was not, deliberately rather than silently: `values-vi`, `locales_config`,
+     * the picker codes and this mapping all changed in the same commit.
      */
     @Test
-    fun `vietnamese is not yet a supported locale`() {
-        assertEquals(LocaleTag.SYSTEM, LocaleTag.normalize("vi-VN"))
+    fun `vietnamese regional variants map to vi`() {
+        assertEquals("vi", LocaleTag.normalize("vi"))
+        assertEquals("vi", LocaleTag.normalize("vi-VN"))
+        assertEquals("vi", LocaleTag.normalize("VI-vn"))
     }
 }

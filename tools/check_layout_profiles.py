@@ -1,86 +1,196 @@
 #!/usr/bin/env python3
-"""Static geometry checks for the responsive FCM Guard dashboard.
+"""Static layout guards for the Compose dashboard.
 
-Android still performs the real resource/layout compilation in assembleDebug. These
-checks guard the dimensions that are easiest to regress on compact HyperOS phones.
+Phase 3 replaced the View-system dashboard (and its XML layouts) with Compose, so the
+old geometry checks no longer had anything to inspect. These guards cover what is still
+statically verifiable and what actually regressed historically:
+
+1. No XML dashboard layout may creep back in.
+2. No fixed-width container may be introduced (the reason compact HyperOS phones were
+   tuned in the first place): widths/spacers are fixed only up to 96 dp.
+3. The four top-level destinations must exist, so navigation cannot silently lose a
+   screen.
+4. No hardcoded user-facing string may appear in Compose sources (localization guard).
+5. Vietnamese translations stay complete and format-compatible with English.
+6. `vi` stays reachable from the locale config, the picker and both arrays.
+7. The build identity (`applicationId`, `minSdk`, `targetSdk`, version format), the four
+   permissions and the three manifest components keep their documented values.
+8. The removed custom views must not return without a documented decision.
+
+Real resource compilation still happens in assembleDebug; compact-width behaviour is
+covered by Compose layout rules here and by instrumentation tests in Phase 5.
 """
 from pathlib import Path
+import re
+import sys
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = ROOT / "app/src/main/res/values/dimens.xml"
-LARGE = ROOT / "app/src/main/res/values-w420dp/dimens.xml"
+UI = ROOT / "app/src/main/java/com/reed/fcmguard/ui"
+LAYOUTS = ROOT / "app/src/main/res/layout"
+
+failures = []
 
 
-def read_dp(path: Path):
+def fail(message: str) -> None:
+    failures.append(message)
+
+
+# 1. No XML dashboard layout.
+if LAYOUTS.exists():
+    leftovers = sorted(p.name for p in LAYOUTS.glob("*.xml"))
+    if leftovers:
+        fail(f"XML layouts are no longer used by the dashboard but still exist: {leftovers}")
+
+# 2. Fixed widths stay small. Anything above 96 dp cannot fit a 320 dp device next to
+#    screen padding once a second element is present.
+MAX_FIXED_DP = 96.0
+width_pattern = re.compile(r"(?:required)?[Ww]idth\(\s*(\d+(?:\.\d+)?)\.dp")
+for source in UI.rglob("*.kt"):
+    text = source.read_text(encoding="utf-8")
+    for match in width_pattern.finditer(text):
+        value = float(match.group(1))
+        if value > MAX_FIXED_DP:
+            fail(f"{source.relative_to(ROOT)}: fixed width {value}dp exceeds {MAX_FIXED_DP}dp")
+
+# 3. Destination set is part of the information architecture.
+shell = UI / "MamoriApp.kt"
+if not shell.exists():
+    fail("ui/MamoriApp.kt is missing")
+else:
+    shell_text = shell.read_text(encoding="utf-8")
+    for route in ("home", "fcm", "history", "settings", "language"):
+        if f'"{route}"' not in shell_text:
+            fail(f"navigation destination '{route}' is missing from MamoriApp.kt")
+
+# 4. No hardcoded user-facing strings in Compose.
+literal_text = re.compile(r'\bText\(\s*"')
+for source in UI.rglob("*.kt"):
+    for number, line in enumerate(source.read_text(encoding="utf-8").splitlines(), 1):
+        if literal_text.search(line):
+            fail(f"{source.relative_to(ROOT)}:{number}: literal Text(\"...\") - use a string resource")
+
+# 5. Vietnamese parity: every English key exists in values-vi with the same format
+#    specifiers, and no Vietnamese-only key is orphaned.
+
+def string_map(path: Path) -> dict:
     root = ET.parse(path).getroot()
-    out = {}
-    for item in root.findall("dimen"):
-        raw = (item.text or "").strip()
-        if raw.endswith("dp"):
-            out[item.attrib["name"]] = float(raw[:-2])
-    return out
+    return {node.attrib["name"]: node.text or "" for node in root.findall("string")}
 
 
-base = read_dp(BASE)
-large = {**base, **read_dp(LARGE)}
+def format_specs(text: str):
+    return sorted(re.findall(r"%(?:\d+\$)?[sdfx]", text))
 
-profiles = [
-    ("narrow-320dp", 320),
-    ("compact-360dp", 360),
-    ("xiaomi17-class-393dp", 393),
-    ("compact-411dp", 411),
-    ("large-430dp", 430),
-    ("ultra-class-480dp", 480),
-]
 
-for name, width in profiles:
-    d = large if width >= 420 else base
-    page = d["page_horizontal_padding"]
-    hero = width - 2 * page
-    inner = hero - 2 * d["hero_inner_padding"]
-    title_space = inner - d["language_button_width"] - d["language_button_margin_start"]
-    status = hero - 2 * d["status_card_inset"]
+for name in ("strings.xml", "feature_strings.xml", "language_strings.xml"):
+    english = string_map(ROOT / "app/src/main/res/values" / name)
+    vietnamese = string_map(ROOT / "app/src/main/res/values-vi" / name)
+    for key, value in english.items():
+        if key not in vietnamese:
+            fail(f"values-vi/{name}: missing translation for '{key}'")
+        elif format_specs(value) != format_specs(vietnamese[key]):
+            fail(
+                f"values-vi/{name}: format args differ for '{key}' "
+                f"({format_specs(value)} vs {format_specs(vietnamese[key])})"
+            )
+    for key in vietnamese:
+        if key not in english:
+            fail(f"values-vi/{name}: '{key}' has no English source string")
 
-    assert hero >= 285, f"{name}: hero too narrow ({hero}dp)"
-    assert title_space >= 135, f"{name}: title/language row too tight ({title_space}dp)"
-    assert status >= 265, f"{name}: status card too narrow ({status}dp)"
-    assert abs((28 - d["status_card_radius"]) - d["status_card_inset"]) < 0.01, (
-        f"{name}: status and hero corner geometry is no longer concentric"
-    )
-    assert d["status_expanded_top"] < d["hero_height"], (
-        f"{name}: floating status card no longer overlaps the hero"
-    )
+# 6. Vietnamese is reachable from every place a locale list lives.
+locales_config = (ROOT / "app/src/main/res/xml/locales_config.xml").read_text(encoding="utf-8")
+if 'android:name="vi"' not in locales_config:
+    fail("locales_config.xml does not declare 'vi'")
 
-layout = ET.parse(ROOT / "app/src/main/res/layout/activity_main.xml").getroot()
-android_id = "{http://schemas.android.com/apk/res/android}id"
-android_width = "{http://schemas.android.com/apk/res/android}layout_width"
-ids = {node.attrib.get(android_id) for node in layout.iter()}
-for required in (
-    "@+id/stickyHeader",
-    "@+id/heroCard",
-    "@+id/statusCard",
-    "@+id/statusHeaderPanel",
-    "@+id/statusDetailsPanel",
-    "@+id/currentValuePanel",
-    "@+id/scroll",
+settings_source = (UI / "settings/SettingsScreen.kt").read_text(encoding="utf-8")
+if '"vi"' not in settings_source:
+    fail("the language picker does not offer Vietnamese")
+
+base_array = ET.parse(ROOT / "app/src/main/res/values/arrays.xml").getroot()
+vi_array = ET.parse(ROOT / "app/src/main/res/values-vi/arrays.xml").getroot()
+base_entries = base_array.find("string-array[@name='language_entries']")
+vi_entries = vi_array.find("string-array[@name='language_entries']")
+if base_entries is None or vi_entries is None:
+    fail("language_entries array missing")
+else:
+    codes = re.search(r"val codes = listOf\((.*?)\)", settings_source, re.S)
+    code_count = len(re.findall(r'"[^"]+"', codes.group(1))) if codes else -1
+    if code_count != len(base_entries) or code_count != len(vi_entries):
+        fail(
+            "language picker codes and language_entries arrays disagree "
+            f"(codes={code_count}, en={len(base_entries)}, vi={len(vi_entries)})"
+        )
+
+# 7. Build and manifest invariants. These are the constraints that must never be broken
+#    casually: the fork identity, the load-bearing targetSdk, and the privileged surface.
+build_gradle = (ROOT / "app/build.gradle").read_text(encoding="utf-8")
+for pattern, message in (
+    (r'applicationId\s+"com\.reed\.fcmguard"', "applicationId must stay com.reed.fcmguard"),
+    (r"targetSdk\s+22\b", "targetSdk must stay 22 (legacy write path depends on it)"),
+    (r"minSdk\s+21\b", "minSdk must stay 21"),
+    (r'versionName\s+"\d+\.\d+\.\d+"', "versionName must match the CI-parsed x.y.z form"),
 ):
-    assert required in ids, f"missing required dashboard id: {required}"
+    if not re.search(pattern, build_gradle):
+        fail(message)
 
-status_card = next(node for node in layout.iter() if node.attrib.get(android_id) == "@+id/statusCard")
-assert status_card.tag == "com.reed.fcmguard.CollapsingStatusCard", (
-    "statusCard must keep its custom visual-bottom implementation"
-)
+manifest_root = ET.parse(ROOT / "app/src/main/AndroidManifest.xml").getroot()
+android_ns = "{http://schemas.android.com/apk/res/android}"
+required_permissions = {
+    "android.permission.WRITE_SETTINGS",
+    "android.permission.RECEIVE_BOOT_COMPLETED",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.POST_NOTIFICATIONS",
+}
+declared = {
+    node.attrib.get(android_ns + "name")
+    for node in manifest_root.findall("uses-permission")
+}
+missing_permissions = required_permissions - declared
+if missing_permissions:
+    fail(f"manifest is missing permissions: {sorted(missing_permissions)}")
 
-details_panel = next(node for node in layout.iter() if node.attrib.get(android_id) == "@+id/statusDetailsPanel")
-value_panel = next(node for node in layout.iter() if node.attrib.get(android_id) == "@+id/currentValuePanel")
-assert details_panel.attrib.get(android_width) == "match_parent", (
-    "statusDetailsPanel must span the same card width as the whitelist panel"
-)
-assert value_panel.attrib.get(android_width) == "match_parent", (
-    "currentValuePanel must span the same card width as the detailed status cover"
-)
+application = manifest_root.find("application")
+if application is None:
+    fail("manifest has no <application>")
+else:
+    components = {
+        "activity": (".MainActivity", "true"),
+        "service": (".GuardService", "false"),
+        "receiver": (".BootReceiver", "true"),
+    }
+    for tag, (name, exported) in components.items():
+        node = application.find(tag)
+        if node is None:
+            fail(f"manifest is missing the {tag} {name}")
+            continue
+        actual_name = node.attrib.get(android_ns + "name")
+        actual_exported = node.attrib.get(android_ns + "exported")
+        if actual_name != name:
+            fail(f"{tag} name changed: {actual_name} (expected {name})")
+        if actual_exported != exported:
+            fail(f"{tag} {name} exported={actual_exported} (expected {exported})")
 
-print("Responsive layout checks passed for:")
-for name, width in profiles:
-    print(f"  - {name}: {width}dp")
+# 8. Removed View UI stays removed.
+for legacy in (
+    "app/src/main/java/com/reed/fcmguard/StickyDashboardLayout.java",
+    "app/src/main/java/com/reed/fcmguard/CollapsingStatusCard.java",
+    "app/src/main/java/com/reed/fcmguard/MainActivity.java",
+):
+    if (ROOT / legacy).exists():
+        fail(f"legacy View UI reappeared: {legacy}")
+
+if failures:
+    print("layout profile checks: FAIL")
+    for failure in failures:
+        print(f"  - {failure}")
+    sys.exit(1)
+
+print("layout profile checks: PASS")
+print("  - no XML dashboard layout")
+print(f"  - no fixed width above {MAX_FIXED_DP}dp in ui/")
+print("  - four top-level destinations present")
+print("  - no hardcoded Text(\"...\") literals in ui/")
+print("  - legacy View-system classes absent")
+print("  - Vietnamese translations complete and format-compatible")
+print("  - 'vi' declared in locale config, picker and both arrays")
+print("  - build identity, targetSdk, permissions and exported components unchanged")

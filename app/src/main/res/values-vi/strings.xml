@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mamori</string>
+    <string name="subtitle">Bảo vệ FCM nhẹ nhàng cho HyperOS</string>
+    <string name="label_key">Khóa cài đặt</string>
+    <string name="label_item">Mục bắt buộc</string>
+    <string name="save_configuration">Lưu cấu hình</string>
+    <string name="grant_modify">Cấp quyền Sửa cài đặt hệ thống</string>
+    <string name="repair_now">Sửa ngay</string>
+    <string name="wake_fcm">Đánh thức FCM ngay</string>
+    <string name="open_fcm_diag">Mở chẩn đoán FCM</string>
+    <string name="status_title">Trạng thái</string>
+    <string name="current_value_title">Giá trị danh sách cho phép hiện tại</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="follow_system">Theo hệ thống</string>
+    <string name="english">English</string>
+    <string name="simplified_chinese">简体中文</string>
+    <string name="default_key">MILLET_NO_RESTRICT_APP</string>
+    <string name="default_required_item">com.google.android.gms</string>
+
+    <string name="protection_title">Bảo vệ</string>
+    <string name="automatic_protection">Tự động bảo vệ</string>
+    <string name="automatic_protection_summary">Chỉ theo dõi khóa danh sách cho phép FCM theo sự kiện. Kiểm tra dự phòng mỗi 30 phút không đánh thức thiết bị, chỉ dùng để phòng hờ.</string>
+    <string name="persistent_notification">Thông báo thường trực</string>
+    <string name="persistent_notification_summary">Nên BẬT để có độ tin cậy tối đa. TẮT để bỏ thông báo thường trực và chỉ chạy nền; khi đó HyperOS có thể dừng dịch vụ dễ hơn.</string>
+    <string name="actions_title">Công cụ</string>
+    <string name="advanced_title">Cấu hình nâng cao</string>
+
+    <string name="helper_text">Thiết kế tiết kiệm pin: dịch vụ không còn dò mỗi 30 giây, không theo dõi cài đặt hệ thống không liên quan và chỉ gửi yêu cầu kết nối lại FCM sau khi thực sự sửa danh sách.</string>
+    <string name="note_text">Khuyến nghị trên HyperOS: bật Tự khởi chạy và đặt chế độ pin là Không hạn chế. Không cần tùy chọn nhà phát triển, gỡ lỗi USB hay gỡ lỗi không dây.</string>
+
+    <string name="status_protected">Đã bảo vệ</string>
+    <string name="status_ready">Sẵn sàng</string>
+    <string name="status_attention">Cần chú ý</string>
+    <string name="status_granted">Sửa cài đặt: đã cấp</string>
+    <string name="status_not_granted">Sửa cài đặt: chưa cấp</string>
+    <string name="status_enabled">Tự động bảo vệ: đã bật</string>
+    <string name="status_disabled">Tự động bảo vệ: đã tắt</string>
+    <string name="present_yes">Mục bắt buộc có mặt: có</string>
+    <string name="present_no">Mục bắt buộc có mặt: không</string>
+    <string name="notification_mode_foreground">Chế độ nền: dịch vụ thường trực</string>
+    <string name="notification_mode_quiet">Chế độ nền: chỉ chạy nền yên lặng</string>
+
+    <string name="saved">Đã lưu cấu hình</string>
+    <string name="repaired">Đã sửa / đã bảo vệ</string>
+    <string name="already_protected">Đã được bảo vệ</string>
+    <string name="missing_current">(thiếu)</string>
+    <string name="permission_missing">Chưa được cấp quyền Sửa cài đặt hệ thống</string>
+    <string name="service_started">Đã bật tự động bảo vệ</string>
+    <string name="service_stopped">Đã tắt tự động bảo vệ</string>
+    <string name="wake_sent">Đã gửi nhịp tim / yêu cầu kết nối lại</string>
+    <string name="diagnostics_unavailable">Không tìm thấy màn hình chẩn đoán FCM</string>
+    <string name="write_rejected">Hệ thống từ chối ghi</string>
+    <string name="write_failed">Ghi thất bại: %1$s</string>
+
+    <!-- Verified operations, snapshots and recovery -->
+    <string name="result_applied">Đã sửa và xác minh</string>
+    <string name="result_confirmation_required">Danh sách cho phép đang trống — cần xác nhận</string>
+    <string name="result_snapshot_failed">Không thay đổi: không lưu được bản sao lưu (%1$s)</string>
+    <string name="result_read_failed">Không đọc được giá trị hiện tại (%1$s)</string>
+    <string name="result_unverified">Không xác minh được lần ghi — giá trị có thể chưa thay đổi</string>
+    <string name="result_recovery_required">Thao tác trước chưa hoàn tất — cần phục hồi</string>
+
+    <string name="restore_previous_value">Phục hồi giá trị trước đó</string>
+    <string name="restore_dialog_title">Phục hồi giá trị trước đó?</string>
+    <string name="restore_dialog_message">Danh sách cho phép chính xác đã lưu trước lần thay đổi gần nhất.\n\nKhóa: %1$s\nĐã lưu: %2$s\nSố gói: %3$d\n\nGiá trị hiện tại sẽ được sao lưu trước, nên lần phục hồi này cũng có thể hoàn tác.</string>
+    <string name="restore_confirm">Phục hồi</string>
+    <string name="restore_done">Đã phục hồi và xác minh giá trị trước đó</string>
+    <string name="restore_none">Chưa có giá trị nào được lưu cho khóa này</string>
+    <string name="restore_corrupt">Bản đã lưu không vượt qua kiểm tra toàn vẹn nên không được dùng</string>
+    <string name="restore_unverified">Không xác minh được lần phục hồi — giá trị có thể chưa thay đổi</string>
+
+    <string name="empty_whitelist_title">Danh sách cho phép đang trống</string>
+    <string name="empty_whitelist_message">Danh sách cho phép hiện đang trống nên Mamori sẽ không tự thêm gói nào.\n\nChỉ %1$s được thêm. Mọi ứng dụng khác vẫn ngoài danh sách.</string>
+    <string name="empty_whitelist_confirm">Thêm %1$s</string>
+
+    <string name="recovery_title">Thao tác trước chưa hoàn tất</string>
+    <string name="recovery_message">Mamori đã dừng giữa một thay đổi và sẽ không tự sửa bất cứ thứ gì.\n\nBắt đầu: %1$s\nTrạng thái cuối: %2$s\nKhóa: %3$s</string>
+    <string name="recovery_restore">Phục hồi giá trị đã lưu</string>
+    <string name="recovery_dismiss">Bỏ qua</string>
+
+    <!-- Compose UI shell -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_apps">Ứng dụng FCM</string>
+    <string name="nav_history">Lịch sử</string>
+    <string name="nav_settings">Cài đặt</string>
+
+    <string name="active_key">Khóa cài đặt: %1$s</string>
+    <string name="status_unavailable">Đang đọc trạng thái hiện tại…</string>
+    <string name="permission_explanation">Mamori cần quyền Sửa cài đặt hệ thống để ghi danh sách cho phép. Không có quyền này thì không thao tác nào được thực hiện.</string>
+    <string name="no_packages_listed">Không có gói nào trong cài đặt này.</string>
+    <string name="package_count">%1$d gói trong danh sách</string>
+    <string name="wake_unavailable">Không đích FCM nào nhận được yêu cầu kết nối lại</string>
+
+    <string name="recent_activity_title">Hoạt động gần đây</string>
+    <string name="recent_activity_empty">Chưa ghi nhận thao tác nào.</string>
+    <string name="view_all_history">Xem toàn bộ lịch sử</string>
+
+    <string name="operation_running">Đang thực hiện thao tác</string>
+    <string name="stage_checking">Đang kiểm tra giá trị hiện tại…</string>
+    <string name="stage_backing_up">Đang tạo bản sao lưu…</string>
+    <string name="stage_applying">Đang áp dụng thay đổi…</string>
+    <string name="stage_verifying">Đang xác minh kết quả…</string>
+    <string name="stage_restoring">Đang phục hồi giá trị đã lưu…</string>
+    <string name="stage_working">Đang xử lý…</string>
+
+    <string name="result_state_completed">Hoàn tất</string>
+    <string name="result_state_partially_completed">Hoàn tất một phần</string>
+    <string name="result_state_failed">Thất bại</string>
+    <string name="result_state_cancelled">Đã hủy</string>
+    <string name="result_state_interrupted">Bị gián đoạn</string>
+    <string name="result_state_running">Đang thực hiện</string>
+
+    <string name="operation_history">Lịch sử thao tác</string>
+    <string name="history_summary">%1$d thao tác đã ghi, mới nhất trước</string>
+    <string name="history_empty">Chưa có thao tác nào được ghi.</string>
+    <string name="history_operation_id">Mã thao tác</string>
+    <string name="history_started">Bắt đầu</string>
+    <string name="history_snapshot">Tham chiếu sao lưu</string>
+    <string name="history_detail">Chi tiết</string>
+    <string name="history_note">Bản ghi được lưu trước mỗi bước đặc quyền, nên thao tác bị gián đoạn vẫn hiển thị thay vì biến mất. Chạm vào một bản ghi để xem chi tiết.</string>
+
+    <string name="search_apps">Tìm theo tên hoặc gói</string>
+    <string name="scanning_apps">Đang quét…</string>
+    <string name="filter_all">Tất cả</string>
+    <string name="filter_attention">Cần chú ý</string>
+    <string name="fcm_search_empty">Không có ứng dụng nào khớp tìm kiếm hoặc bộ lọc.</string>
+
+    <string name="change_language">Thay đổi</string>
+    <string name="language_summary">Chọn ngôn ngữ của chính Mamori. Không ảnh hưởng đến danh sách cho phép hay ứng dụng khác.</string>
+    <string name="language_follow_system_note">Theo hệ thống sẽ dùng ngôn ngữ thiết bị. Trên Android 13 trở lên, màn hình ngôn ngữ ứng dụng của hệ thống là nguồn chuẩn duy nhất.</string>
+    <string name="dynamic_color_title">Màu động</string>
+    <string name="dynamic_color_summary">Dùng bảng màu từ hình nền hệ thống. Tự tắt ở nơi nền tảng không cung cấp bảng màu.</string>
+    <string name="dynamic_color_unsupported">Không khả dụng trên phiên bản Android này. Mamori dùng bảng màu có sẵn.</string>
+    <string name="advanced_summary">Chỉ thay đổi khi ROM của bạn lưu danh sách cho phép dưới khóa khác.</string>
+    <string name="settings_about">Giới thiệu</string>
+    <string name="about_version">Mamori %1$s</string>
+    <string name="about_upstream_summary">Bản fork hiện đại hóa của FCMGuard-HyperOS do Yijie Gao phát triển, giữ nguyên khả năng bảo vệ FCM không cần root.</string>
+    <string name="about_license_summary">Phát hành theo Giấy phép MIT. Bản quyền và thông báo giấy phép của dự án gốc được giữ nguyên.</string>
+
+    <string name="operation_result_title">Kết quả thao tác</string>
+    <string name="close">Đóng</string>
+    <string name="suggestion_grant_permission">Mở Sửa cài đặt hệ thống từ trang chủ, cấp quyền rồi thử lại. Không có gì bị thay đổi.</string>
+    <string name="suggestion_check_storage">Giải phóng dung lượng rồi thử lại. Không có gì bị thay đổi.</string>
+    <string name="suggestion_retry_permission">Thu hồi rồi cấp lại quyền Sửa cài đặt hệ thống, sau đó thử lại.</string>
+    <string name="suggestion_check_history">Mở lịch sử thao tác để xem bản ghi và bản sao lưu đã lưu.</string>
+    <string name="suggestion_recover">Chọn Phục hồi giá trị đã lưu hoặc Bỏ qua trên trang chủ trước khi thực hiện thay đổi mới.</string>
+    <string name="suggestion_check_backup">Không thể tin cậy bản đã lưu. Hãy xem lịch sử thao tác trước khi thay đổi.</string>
+    <string name="suggestion_confirm_whitelist">Xác nhận trên trang chủ để chỉ thêm gói bắt buộc; không ứng dụng nào khác được thêm.</string>
+
+    <string name="open_diagnostics">Mở chẩn đoán</string>
+    <string name="diagnostics_title">Chẩn đoán</string>
+    <string name="diagnostics_summary">Ảnh chụp chỉ đọc của ứng dụng, cài đặt và nhật ký. Không mục nào trên màn hình này thay đổi trạng thái thiết bị.</string>
+    <string name="diagnostics_refresh">Làm mới</string>
+    <string name="diagnostics_share_log">Chia sẻ nhật ký</string>
+    <string name="diagnostics_clear_log">Xóa nhật ký</string>
+    <string name="diagnostics_share_unavailable">Không có ứng dụng nào để chia sẻ nhật ký</string>
+    <string name="diagnostics_section_execution">Thực thi</string>
+    <string name="diagnostics_backend">Cơ chế ghi</string>
+    <string name="diagnostics_backend_value">Ghi Settings.System bằng quyền Sửa cài đặt hệ thống. Không dùng root, shell, Shizuku hay ADB.</string>
+    <string name="diagnostics_section_configuration">Cấu hình</string>
+    <string name="diagnostics_section_storage">Dữ liệu đã lưu</string>
+    <string name="diagnostics_snapshots">Bản sao lưu đã xác minh</string>
+    <string name="diagnostics_history_records">Bản ghi thao tác</string>
+    <string name="diagnostics_latest_backup">Bản sao lưu gần nhất</string>
+    <string name="diagnostics_none">Không có</string>
+    <string name="diagnostics_last_backup">%1$s · %2$d gói</string>
+    <string name="diagnostics_log_file">Dòng nhật ký trên đĩa</string>
+    <string name="diagnostics_persisted_lines">%1$d</string>
+    <string name="diagnostics_section_device">Thiết bị</string>
+    <string name="diagnostics_manufacturer">Nhà sản xuất</string>
+    <string name="diagnostics_model">Mẫu máy</string>
+    <string name="diagnostics_android">Android</string>
+    <string name="diagnostics_build">Bản dựng</string>
+    <string name="diagnostics_security_center">Trung tâm bảo mật HyperOS</string>
+    <string name="diagnostics_installed">Đã cài</string>
+    <string name="diagnostics_not_installed">Không tìm thấy</string>
+    <string name="diagnostics_app_version">Phiên bản ứng dụng</string>
+    <string name="diagnostics_section_log">Nhật ký</string>
+    <string name="diagnostics_log_note">Cũ nhất trước. Bộ đệm trong bộ nhớ giữ 300 mục gần nhất; tệp được cắt tự động.</string>
+    <string name="diagnostics_log_empty">Chưa có mục nhật ký nào.</string>
+
+    <string name="notification_channel_name">Bảo vệ FCM Guard</string>
+    <string name="notification_channel_description">Thông báo ưu tiên thấp giúp việc bảo vệ FCM tự động luôn ổn định</string>
+    <string name="notification_active">Đang bảo vệ · theo sự kiện</string>
+    <string name="notification_repaired">Đã sửa danh sách · FCM được bảo vệ</string>
+</resources>

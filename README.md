@@ -12,6 +12,20 @@
 
 The upstream FCM protection mechanism is preserved unchanged; this fork rebuilds the application around Kotlin and Material 3 and adds Vietnamese as a first-class locale. The application ID stays `com.reed.fcmguard` so existing installs upgrade in place. The documentation below describes the upstream behavior that Mamori inherits.
 
+## Mamori 2.0.0
+
+Kotlin + Jetpack Compose (Material 3 Expressive), dynamic color, a complete Vietnamese UI,
+visible operation history, read-only diagnostics, and structured recovery suggestions for
+every failed or unverified write. Release builds are R8-shrunk.
+
+| Document | Contents |
+| --- | --- |
+| [Architecture](docs/ARCHITECTURE.md) | what exists now, module by module |
+| [Testing](docs/TESTING.md) | automated layers, and what is still unverified |
+| [Compatibility](docs/COMPATIBILITY.md) | Android/HyperOS support, the `targetSdk 22` install restriction |
+| [Release notes](docs/RELEASE_NOTES.md) | 2.0.0 changes and upgrade notes |
+| [Third-party notices](docs/THIRD_PARTY_NOTICES.md) | licenses and upstream attribution |
+
 ---
 
 **A lightweight, no-root watchdog for HyperOS 3 China ROM that keeps Google Play services in Xiaomi's no-restrict background list so FCM push stays reliable.**
@@ -34,6 +48,7 @@ The upstream FCM protection mechanism is preserved unchanged; this fork rebuilds
 - **FCM app assistant** — scans likely Firebase/GCM clients and, when HyperOS exposes the vendor AppOps state, shows read-only Autostart status with automatic re-check after returning from system settings.
 - **Native dark mode** — System / Light / Dark, with **System** as the default.
 - **10-language UI** — English, Simplified Chinese, Traditional Chinese, French, Japanese, Korean, Spanish, Portuguese, German, and Russian through Android's native per-app language mechanism.
+- **Language manager** — reads the system language list, changes it through the platform's own store with verified read-back, keeps the original list for one-tap restore, and lists per-app overrides. Other apps are read-only: Android has no public API to set another app's language.
 - **Compact-phone ready** — responsive layout checks cover 320–480dp widths, including a Xiaomi 17-class 393dp profile.
 
 ## Quick setup

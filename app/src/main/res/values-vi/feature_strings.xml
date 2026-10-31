@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fcm_apps_title">Trợ lý ứng dụng FCM</string>
+    <string name="fcm_apps_summary">Phát hiện ứng dụng đã cài có thành phần nhận FCM/GCM chuẩn, rồi kiểm tra trạng thái Tự khởi chạy trên HyperOS khi ROM cho phép.</string>
+    <string name="scan_fcm_apps">Quét ứng dụng FCM</string>
+    <string name="collapse_fcm_apps">Thu gọn danh sách</string>
+    <string name="open_autostart_manager">Cấu hình tất cả trong HyperOS</string>
+    <string name="fcm_apps_not_scanned">Chạm Quét ứng dụng FCM để tạo danh sách cục bộ.</string>
+    <string name="fcm_apps_found">Phát hiện %1$d ứng dụng hỗ trợ FCM</string>
+    <string name="fcm_apps_status_summary">%1$d phát hiện · %2$d đã bật · %3$d cần chú ý · %4$d không rõ</string>
+    <string name="fcm_autostart_status_unavailable">Phát hiện %1$d ứng dụng FCM. Bản HyperOS này không cung cấp trạng thái Tự khởi chạy có thể đọc. Hãy dùng Cấu hình tất cả trong HyperOS.</string>
+    <string name="no_fcm_apps">Không phát hiện ứng dụng FCM nào có giao diện người dùng.</string>
+    <string name="app_settings">Tự khởi chạy</string>
+    <string name="autostart_enabled">Đã bật</string>
+    <string name="autostart_partial">Một phần</string>
+    <string name="autostart_disabled">Đã tắt</string>
+    <string name="autostart_unknown">Không rõ</string>
+    <string name="autostart_manager_unavailable">Không mở được cài đặt Tự khởi chạy của HyperOS</string>
+    <string name="app_settings_unavailable">Không mở được cài đặt ứng dụng</string>
+    <string name="fcm_detection_note">Trạng thái Tự khởi chạy chỉ đọc và chỉ là nỗ lực tốt nhất. Không rõ nghĩa là HyperOS đã chặn hoặc không cung cấp truy vấn AppOps của nhà sản xuất; FCM Guard không bao giờ coi Không rõ là Đã tắt.</string>
+
+    <string name="appearance_title">Giao diện</string>
+    <string name="appearance_summary">Mặc định: theo hệ thống. Chỉ thay đổi giao diện, không tạo thêm hoạt động nền.</string>
+    <string name="theme_system">Hệ thống</string>
+    <string name="theme_light">Sáng</string>
+    <string name="theme_dark">Tối</string>
+</resources>

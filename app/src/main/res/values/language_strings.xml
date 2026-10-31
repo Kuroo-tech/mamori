@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_manager_title">Language manager</string>
+    <string name="language_manager_summary">System and per-app languages, read from Android itself. Mamori reports a change only after the platform confirms it.</string>
+
+    <string name="system_language_title">System language</string>
+    <string name="system_language_summary">The device-wide language list. Changing it affects every app that follows the system.</string>
+    <string name="system_language_primary">Primary</string>
+    <string name="system_language_identifier">Identifier</string>
+    <string name="system_language_native">In its own language</string>
+    <string name="system_language_fallbacks">Fallbacks</string>
+    <string name="system_language_source_config">Read from the running configuration; this build exposes no LocaleManager list.</string>
+    <string name="system_language_unavailable">The system locale list is unavailable on this build.</string>
+    <string name="system_language_change_title">Change system language</string>
+    <string name="system_language_mechanism">Android has no public system-language API, so Mamori writes the platform\'s own system-locale store with “Modify system settings”, then checks the running configuration. Builds that only apply it at boot are reported as such.</string>
+    <string name="system_language_no_access">“Modify system settings” is required for this. Grant it, then return to this screen.</string>
+    <string name="system_language_grant">Grant access</string>
+    <string name="system_language_change_action">Change language</string>
+    <string name="system_language_open_settings">Open Android language settings</string>
+    <string name="system_language_restore_title">Restore original language</string>
+    <string name="system_language_restore_action">Restore original</string>
+    <string name="system_language_restore_unavailable">No original language snapshot is saved yet, so there is nothing to restore.</string>
+    <string name="system_language_snapshot_missing">The original language list is captured automatically before the first change. Without it, restoring would be a guess.</string>
+    <string name="system_language_snapshot_saved">Saved original</string>
+    <string name="system_language_snapshot_codes">Original identifiers</string>
+    <string name="system_language_snapshot_created">Captured</string>
+    <string name="system_language_restore_confirm_title">Restore the original language?</string>
+    <string name="system_language_restore_confirm_message">The system language list will be set back to %1$s. Apps that follow the system will switch too.</string>
+    <string name="system_language_confirm_title">Change the system language?</string>
+    <string name="system_language_confirm_message">Every app that follows the system will switch to %1$s. The current language list is saved first so you can restore it.</string>
+    <string name="system_language_confirm_apply">Apply</string>
+    <string name="system_language_picker_title">System language</string>
+    <string name="system_language_picker_note">The chosen language becomes the primary system locale; your existing fallbacks are kept.</string>
+    <string name="system_language_applied">System language set to %1$s (%2$s)</string>
+    <string name="system_language_restored">System language restored to %1$s</string>
+    <string name="system_language_pending_restart">Saved %1$s (%2$s). On this build Android applies it after a restart.</string>
+
+    <string name="app_language_title">Mamori\'s language</string>
+    <string name="app_language_summary">Overrides the language of this app only. Android stores it; Mamori does not keep a copy.</string>
+    <string name="app_language_current">Current</string>
+    <string name="app_language_change">Choose language</string>
+    <string name="app_language_use_system">Use system default</string>
+    <string name="app_language_unsupported">This Android version has no per-app language API, so the language cannot be set here.</string>
+    <string name="app_language_applied">Mamori now uses %1$s</string>
+    <string name="app_language_cleared">Mamori follows the system language again</string>
+    <string name="app_language_failed">Language change failed: %1$s</string>
+    <string name="app_language_unverified">The change was not confirmed: expected %1$s, Android reports %2$s</string>
+
+    <string name="installed_apps_title">App languages</string>
+    <string name="installed_apps_summary">Per-app overrides as Android stores them. Android only lets an app change its own language, so other apps are read-only here.</string>
+    <string name="installed_apps_search">Search by name or package</string>
+    <string name="installed_apps_refresh">Refresh app list</string>
+    <string name="installed_apps_restricted">The system limited the installed-app query, so some apps are hidden.</string>
+    <string name="installed_apps_empty">No user-facing apps were found.</string>
+    <string name="installed_apps_no_matches">No app matches this search or filter.</string>
+    <string name="installed_apps_read_unsupported">Reading another app\'s language needs Android 15.</string>
+    <string name="installed_apps_read_available">Android reports other apps\' languages on this device.</string>
+    <string name="installed_apps_read_denied">Android blocked reading other apps\' languages here (READ_APP_SPECIFIC_LOCALES is signature-only). Their state stays unknown rather than guessed.</string>
+    <string name="installed_apps_self_hint">Other apps are read-only: Android has no public API to set another app\'s language, so Mamori opens that app\'s settings instead of faking a change.</string>
+    <string name="installed_apps_open_settings">App settings</string>
+    <string name="app_locale_override">Custom: %1$s</string>
+    <string name="app_locale_not_readable">Unknown (not readable)</string>
+    <string name="app_locale_unavailable">Not readable on this Android version</string>
+    <string name="apps_filter_all">All</string>
+    <string name="apps_filter_overridden">Custom</string>
+    <string name="apps_filter_system_default">Default</string>
+    <string name="system_default">System default</string>
+    <string name="language_picker_search">Search languages</string>
+    <string name="language_picker_note">Android accepts only the languages this app declares.</string>
+    <string name="language_picker_empty">No language matches this search.</string>
+
+    <string name="settings_language_manager_title">Language manager</string>
+    <string name="settings_language_manager_summary">System language, original-language restore, and per-app overrides</string>
+    <string name="settings_language_manager_open">Open</string>
+</resources>

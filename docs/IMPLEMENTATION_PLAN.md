@@ -1,6 +1,6 @@
 # Mamori — Implementation Plan (post-audit)
 
-Status: **Phase 0, 1 and 2 complete. Next: Phase 3 (Material 3 Expressive UI).**
+Status: **Phase 0–5 complete.** All planned phases are implemented; device verification remains outstanding (see `TESTING.md` §2).
 Source of truth for current behavior: [`REPOSITORY_AUDIT.md`](REPOSITORY_AUDIT.md). Current structure: [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ### Decisions taken
@@ -15,7 +15,7 @@ Source of truth for current behavior: [`REPOSITORY_AUDIT.md`](REPOSITORY_AUDIT.m
 
 Landed: Kotlin plugin + version catalog, `android.useAndroidX=true`, 9 of 12 classes converted to Kotlin, pure logic extracted into `PackageList`/`LocaleTag`, 19 JVM unit tests, Mamori rename, `.toolchain/` and `ci-signing/` gitignored.
 
-Still open in Phase 1: remaining Java (`MainActivity`, `StickyDashboardLayout`, `CollapsingStatusCard`) — deliberately deferred to the Phase 3 rewrite rather than converted twice.
+Phase 1 closed by Phase 3: the remaining Java (`MainActivity`, `StickyDashboardLayout`, `CollapsingStatusCard`) was replaced by the Compose shell, not converted twice. No Java source remains.
 
 ### Phase 2 status (complete)
 
@@ -31,7 +31,98 @@ Exit criteria:
 | Restoring a snapshot is a shipped, tested feature | Met: `restore` action, confirmation dialog, digest check, pre-restore snapshot. |
 | Killing the process mid-operation is detectable and user-confirmable, never silent | Met: journal blocks repair with `RecoveryRequired` until the user chooses restore or dismiss. |
 
-Not done in Phase 2, carried forward: history/diagnostics screen (Phase 4), Compose UI (Phase 3), FCM scan off the main thread (Phase 3 item 4).
+Carried forward from Phase 2: diagnostics screen (Phase 4). The Compose UI and the
+off-main-thread FCM scan landed in Phase 3.
+
+### Phase 3 status (complete)
+
+Landed: Compose + Material 3 (`compose-bom 2024.09.03`, Kotlin compose plugin 2.0.21),
+dynamic color with a static fallback palette, typography/shape scales, a four-destination
+`NavigationBar` shell (`Home` / `FCM apps` / `History` / `Settings`), the dashboard with a
+pinned status strip and real status lines, the FCM assistant with search/filter and the
+scan plus vendor AppOps probe on `Dispatchers.IO`, a history screen backed by the real
+journal, and settings (appearance, language, advanced configuration, about).
+`MainActivity` is now a Kotlin `ComponentActivity`; the Java UI, its layouts and its
+drawables are deleted.
+
+Verification: `tools/check_layout_profiles.py` PASS, 58 JVM tests 0 failures,
+`:app:assembleDebug` green, APK still `com.reed.fcmguard` / `targetSdk 22` / the four
+permissions / three components. On-device behaviour is unverified — no device attached.
+
+Deviations, and why:
+
+1. **The scroll-linked status card was not ported.** Its geometry relied on a custom
+   `drawChild` clipping mask and a decoupled visual bottom edge. The replacement is a
+   `LazyColumn` sticky status strip plus a normal detail card — same information, same
+   order, no fragile masking. Rationale in `ARCHITECTURE.md` §7.
+2. **`History` shipped with Phase 3, not Phase 4.** The journal already persisted the
+   records; rendering them is read-only and the navigation deliverable named the tab.
+   The Phase 4 work that remains is diagnostics, logging, error surfaces and Vietnamese.
+3. **`tools/check_layout_profiles.py` was rewritten, not deleted.** It no longer has XML
+   geometry to inspect; it now guards compact-width and localization regressions that are
+   statically checkable.
+4. **Stage reporting is observation, not instrumentation.** `Operations.currentStage()`
+   exposes the state the engine already journals; the engine itself was not modified.
+
+### Phase 4 status (complete)
+
+Landed: complete `values-vi` (163 string keys, `feature_strings`, language array), `vi`
+wired into `locales_config.xml`, `LocaleTag.normalize` and the picker; `MamoriLog` (300-entry
+in-memory ring, rolling 128/64 KB file on a daemon thread, `warnOnce` for systematic
+probe failures); a read-only diagnostics screen reachable from Settings (write mechanism,
+permission and service state, configuration, stored backups/records, device and ROM facts,
+log viewer with share and clear); `OutcomeExplanations` giving every failed or partial
+outcome a headline, a recovery suggestion and its captured technical detail, rendered in a
+result dialog with a link to history; logging at the service, executor, scanner, AppOps
+probe, deep-link and repository boundaries; and a parity guard in the layout checker.
+
+Verification: `tools/check_layout_profiles.py` PASS (including English/Vietnamese key and
+format parity), 63 JVM tests 0 failures, `:app:assembleDebug` green, APK still
+`com.reed.fcmguard` / `targetSdk 22` / the four permissions / three components, and `vi`
+present in the packaged locale list.
+
+Deviations, and why:
+
+1. **History was already shipped in Phase 3.** Phase 4 kept it unchanged; only the result
+dialog now links to it.
+2. **Log export uses `ACTION_SEND` plain text.** A file export would need a `FileProvider`
+   and a new manifest component for no diagnostic gain; sharing the text keeps the manifest
+   at three components.
+3. **Some suggestions are deliberately generic.** The engine reports the exception class,
+   not an errno, so "free up storage" is offered for snapshot failure instead of pretending
+   to know the exact cause.
+4. **The Vietnamese translation is complete but not native-reviewed** — recorded as a
+   release limitation in `ARCHITECTURE.md` §10.
+5. **Instrumentation tests still do not exist.** Phase 4 added unit coverage for the log
+   ring and the `vi` locale mapping only; Compose UI tests remain Phase 5.
+
+### Phase 5 status (complete)
+
+Landed: release build fixed (scoped `ExpiredTargetSdkVersion` lint disable with the reason,
+R8 + resource shrinking, `app/proguard-rules.pro`, unsigned release APK at ~1.4 MB),
+`versionCode 40` / `versionName 2.0.0` so the fork upgrades over upstream, five Compose
+instrumentation tests compiled into the debug test APK, and the release documentation set:
+`TESTING.md`, `COMPATIBILITY.md`, `THIRD_PARTY_NOTICES.md`, `RELEASE_NOTES.md`. The layout
+checker now also guards build identity, permissions and manifest component exports.
+
+Verification: `tools/check_layout_profiles.py` PASS (8 checks), 63 JVM tests 0 failures,
+`:app:assembleDebug`, `:app:assembleDebugAndroidTest` and `:app:assembleRelease` all
+green; `aapt2` confirms `com.reed.fcmguard`, `targetSdk 22`, version 2.0.0/40, the four
+permissions, the three components and `vi` in the packaged locales for both APKs.
+
+Deviations and residual risks:
+
+1. **Instrumentation tests were compiled, not executed.** No device or emulator is
+   available here. `TESTING.md` §5 is the unexecuted device matrix.
+2. **The release APK is unsigned.** No signing material exists in the repository; CI signs
+   the debug APK only. Distribution must reuse the key existing installs trust.
+3. **Android 14+ refuses new installs of `targetSdk 22`.** Surfaced in
+   `COMPATIBILITY.md` §2.1 rather than papered over. Fixing it means replacing the write
+   mechanism, which is a product decision outside this phase.
+4. **R8 output is build-verified only.** Shrinking succeeded and packaging was inspected;
+   a runtime smoke test is still owed.
+5. **No screenshots or visual review.** The UI was not rendered in this environment, so
+   visual polish and on-device layout remain for the device pass.
 
 Deviations from the original plan, and why:
 
@@ -111,7 +202,7 @@ Exit criteria
 
 ---
 
-## 4. Phase 3 — Material 3 Expressive UI
+## 4. Phase 3 — Material 3 Expressive UI ✅
 
 Deliverables (in this order)
 1. Theme: dynamic color (light/dark), explicit static fallback palette, typography and shape scales, motion respecting system animation scale.
@@ -129,7 +220,7 @@ Exit criteria
 
 ---
 
-## 5. Phase 4 — Vietnamese localization, history, errors
+## 5. Phase 4 — Vietnamese localization, history, errors ✅
 
 Deliverables
 - `values-vi`: complete, correct diacritics, terminology from spec §11 (`Việt hóa hệ thống`, `Sao lưu`, `Khôi phục`, `Mức độ hoàn thiện bản dịch`, `Tính tương thích`, `Lịch sử thao tác`).
@@ -145,7 +236,7 @@ Exit criteria
 
 ---
 
-## 6. Phase 5 — Hardening and release
+## 6. Phase 5 — Hardening and release ✅
 
 Deliverables
 - Interrupted-operation recovery UI; storage-exhaustion and permission-revocation handling.

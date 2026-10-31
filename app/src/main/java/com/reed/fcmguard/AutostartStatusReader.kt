@@ -2,6 +2,7 @@ package com.reed.fcmguard
 
 import android.app.AppOpsManager
 import android.content.Context
+import com.reed.fcmguard.core.log.MamoriLog
 
 /**
  * Best-effort, read-only probe for Xiaomi/HyperOS Autostart AppOps.
@@ -10,6 +11,7 @@ import android.content.Context
  * some builds; in that case callers must present UNKNOWN rather than guessing.
  */
 object AutostartStatusReader {
+    private const val TAG = "AutostartStatusReader"
     private const val OP_MIUI_AUTOSTART = 10008
     private const val OP_MIUI_AUTOSTART_SWITCH = 10053
 
@@ -34,7 +36,8 @@ object AutostartStatusReader {
                     (isIgnored(primary) && isAllowed(switchOp)) -> Status.PARTIAL
                 else -> Status.UNKNOWN
             }
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
+            MamoriLog.warnOnce("autostart-check", TAG, "Autostart probe failed", t)
             Status.UNKNOWN
         }
     }
@@ -54,8 +57,9 @@ object AutostartStatusReader {
                 "checkOpNoThrow", Int::class.javaPrimitiveType, Int::class.javaPrimitiveType, String::class.java
             )
             return method.invoke(manager, op, uid, packageName) as? Int
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
             // Fall through to the declared-method probe.
+            MamoriLog.warnOnce("autostart-probe-public", TAG, "checkOpNoThrow unavailable", t)
         }
 
         return try {
@@ -64,7 +68,8 @@ object AutostartStatusReader {
             )
             method.isAccessible = true
             method.invoke(manager, op, uid, packageName) as? Int
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
+            MamoriLog.warnOnce("autostart-probe-declared", TAG, "vendor AppOps unreadable", t)
             null
         }
     }

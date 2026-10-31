@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import com.reed.fcmguard.SettingsGuard
+import com.reed.fcmguard.core.log.MamoriLog
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -38,8 +39,11 @@ object Operations {
     @JvmStatic
     fun repairAsync(context: Context, confirmEmptyWhitelist: Boolean, callback: RepairCallback) {
         val app = context.applicationContext
+        MamoriLog.attach(app)
         executor.execute {
+            MamoriLog.info(TAG, "repair started (confirmEmptyWhitelist=$confirmEmptyWhitelist)")
             val outcome = tracked { repairBlocking(app, confirmEmptyWhitelist) }
+            logRepair(outcome)
             main.post { callback.onResult(outcome) }
         }
     }
@@ -47,9 +51,41 @@ object Operations {
     @JvmStatic
     fun restoreAsync(context: Context, snapshotId: String, callback: RestoreCallback) {
         val app = context.applicationContext
+        MamoriLog.attach(app)
         executor.execute {
+            MamoriLog.info(TAG, "restore started (snapshot=$snapshotId)")
             val outcome = tracked { restoreBlocking(app, snapshotId) }
+            logRestore(outcome)
             main.post { callback.onResult(outcome) }
+        }
+    }
+
+    private fun logRepair(outcome: RepairOutcome) {
+        when (outcome) {
+            is RepairOutcome.Applied -> MamoriLog.info(
+                TAG,
+                "repair applied op=${outcome.operationId} snapshot=${outcome.snapshotId}"
+            )
+            RepairOutcome.AlreadyCorrect -> MamoriLog.info(TAG, "repair skipped: already correct")
+            is RepairOutcome.RecoveryRequired -> MamoriLog.warn(
+                TAG,
+                "repair blocked by pending operation ${outcome.pending.id}"
+            )
+            else -> MamoriLog.warn(TAG, "repair outcome=${outcome::class.simpleName} $outcome")
+        }
+    }
+
+    private fun logRestore(outcome: RestoreOutcome) {
+        when (outcome) {
+            is RestoreOutcome.Restored -> MamoriLog.info(
+                TAG,
+                "restore applied op=${outcome.operationId} snapshot=${outcome.snapshotId}"
+            )
+            is RestoreOutcome.RecoveryRequired -> MamoriLog.warn(
+                TAG,
+                "restore blocked by pending operation ${outcome.pending.id}"
+            )
+            else -> MamoriLog.warn(TAG, "restore outcome=${outcome::class.simpleName} $outcome")
         }
     }
 
@@ -98,7 +134,11 @@ object Operations {
     /** Most recent intact snapshot for the currently configured key, if any. */
     @JvmStatic
     fun latestSnapshot(context: Context): Snapshot? =
-        snapshots(context).latestFor(SettingsGuard.getConfiguredKey(context))
+        snapshotStore(context).latestFor(SettingsGuard.getConfiguredKey(context))
+
+    /** All intact snapshots, newest first. Read-only; used by diagnostics. */
+    @JvmStatic
+    fun snapshots(context: Context): List<Snapshot> = snapshotStore(context).all()
 
     /**
      * A non-terminal record left behind by a previous process. Never cleared silently.
@@ -116,14 +156,25 @@ object Operations {
     @JvmStatic
     fun history(context: Context): List<OperationRecord> = journal(context).history()
 
+    /**
+     * The journaled stage of an operation that is running in this process right now, or
+     * null when nothing is in flight. Read-only and never invents a stage: the record is
+     * the one the engine itself wrote before each privileged step.
+     */
+    @JvmStatic
+    fun currentStage(context: Context): OperationState? =
+        if (inFlight.get()) journal(context).active()?.state else null
+
     private fun engine(context: Context): RepairEngine = RepairEngine(
         gateway = AndroidSystemSettingsGateway(context),
-        snapshots = snapshots(context),
+        snapshots = snapshotStore(context),
         journal = journal(context)
     )
 
-    private fun snapshots(context: Context): SnapshotStore =
+    private fun snapshotStore(context: Context): SnapshotStore =
         SnapshotStore(File(context.applicationContext.filesDir, "snapshots"))
+
+    private const val TAG = "Operations"
 
     private fun journal(context: Context): OperationJournal =
         SharedPreferencesOperationJournal(

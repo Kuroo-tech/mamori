@@ -6,6 +6,7 @@ import android.content.res.Configuration
 object ThemeHelper {
     private const val PREFS = "guard_state"
     private const val KEY_MODE = "appearance_mode"
+    private const val KEY_DYNAMIC_COLOR = "dynamic_color"
 
     const val MODE_SYSTEM = "system"
     const val MODE_LIGHT = "light"
@@ -44,6 +45,20 @@ object ThemeHelper {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .edit()
             .putString(KEY_MODE, normalized)
+            .apply()
+    }
+
+    /** Dynamic color is on by default; it only ever affects the app's own UI. */
+    @JvmStatic
+    fun isDynamicColorEnabled(context: Context): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(KEY_DYNAMIC_COLOR, true)
+
+    @JvmStatic
+    fun setDynamicColorEnabled(context: Context, enabled: Boolean) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_DYNAMIC_COLOR, enabled)
             .apply()
     }
 

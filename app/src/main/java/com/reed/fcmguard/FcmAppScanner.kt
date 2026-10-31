@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import com.reed.fcmguard.core.log.MamoriLog
 import java.util.Locale
 
 /**
@@ -11,6 +12,7 @@ import java.util.Locale
  * components. It does not inspect traffic or accounts and runs only when requested.
  */
 object FcmAppScanner {
+    private const val TAG = "FcmAppScanner"
     private const val ACTION_FCM = "com.google.firebase.MESSAGING_EVENT"
     private const val ACTION_GCM_RECEIVE = "com.google.android.c2dm.intent.RECEIVE"
 
@@ -31,8 +33,12 @@ object FcmAppScanner {
             packageManager.queryIntentServices(Intent(ACTION_FCM), flags)?.forEach { info ->
                 info.serviceInfo?.packageName?.let { packages.add(it) }
             }
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
             // A restricted PackageManager must not abort the legacy probe below.
+            MamoriLog.warnOnce(
+                "scan-fcm-services", TAG,
+                "FCM service query failed", t
+            )
         }
 
         // Legacy GCM / compatibility path still used by some apps and libraries.
@@ -40,8 +46,12 @@ object FcmAppScanner {
             packageManager.queryBroadcastReceivers(Intent(ACTION_GCM_RECEIVE), flags)?.forEach { info ->
                 info.activityInfo?.packageName?.let { packages.add(it) }
             }
-        } catch (_: Throwable) {
-            // Ignored: results so far remain valid.
+        } catch (t: Throwable) {
+            // Results so far remain valid; the failure is recorded for diagnostics.
+            MamoriLog.warnOnce(
+                "scan-gcm-receivers", TAG,
+                "GCM receiver query failed", t
+            )
         }
 
         val result = ArrayList<AppEntry>()

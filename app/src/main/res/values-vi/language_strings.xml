@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_manager_title">Quản lý ngôn ngữ</string>
+    <string name="language_manager_summary">Ngôn ngữ hệ thống và từng ứng dụng, đọc trực tiếp từ Android. Mamori chỉ báo thay đổi sau khi hệ thống xác nhận.</string>
+
+    <string name="system_language_title">Ngôn ngữ hệ thống</string>
+    <string name="system_language_summary">Danh sách ngôn ngữ của toàn máy. Thay đổi sẽ ảnh hưởng đến mọi ứng dụng theo ngôn ngữ hệ thống.</string>
+    <string name="system_language_primary">Ngôn ngữ chính</string>
+    <string name="system_language_identifier">Mã ngôn ngữ</string>
+    <string name="system_language_native">Tên bản ngữ</string>
+    <string name="system_language_fallbacks">Ngôn ngữ dự phòng</string>
+    <string name="system_language_source_config">Đọc từ cấu hình đang chạy; bản Android này không cung cấp danh sách qua LocaleManager.</string>
+    <string name="system_language_unavailable">Không đọc được danh sách ngôn ngữ hệ thống trên bản Android này.</string>
+    <string name="system_language_change_title">Đổi ngôn ngữ hệ thống</string>
+    <string name="system_language_mechanism">Android không có API công khai để đổi ngôn ngữ hệ thống, nên Mamori ghi vào kho ngôn ngữ hệ thống của nền tảng bằng quyền “Sửa cài đặt hệ thống”, rồi kiểm tra lại cấu hình đang chạy. Bản ROM chỉ áp dụng sau khi khởi động lại sẽ được báo đúng như vậy.</string>
+    <string name="system_language_no_access">Cần quyền “Sửa cài đặt hệ thống”. Hãy cấp quyền rồi quay lại màn hình này.</string>
+    <string name="system_language_grant">Cấp quyền</string>
+    <string name="system_language_change_action">Đổi ngôn ngữ</string>
+    <string name="system_language_open_settings">Mở cài đặt ngôn ngữ Android</string>
+    <string name="system_language_restore_title">Khôi phục ngôn ngữ gốc</string>
+    <string name="system_language_restore_action">Khôi phục bản gốc</string>
+    <string name="system_language_restore_unavailable">Chưa lưu bản chụp ngôn ngữ gốc nên không có gì để khôi phục.</string>
+    <string name="system_language_snapshot_missing">Danh sách ngôn ngữ gốc được lưu tự động trước lần thay đổi đầu tiên. Không có nó thì khôi phục chỉ là phỏng đoán.</string>
+    <string name="system_language_snapshot_saved">Bản gốc đã lưu</string>
+    <string name="system_language_snapshot_codes">Mã ngôn ngữ gốc</string>
+    <string name="system_language_snapshot_created">Thời điểm lưu</string>
+    <string name="system_language_restore_confirm_title">Khôi phục ngôn ngữ gốc?</string>
+    <string name="system_language_restore_confirm_message">Danh sách ngôn ngữ hệ thống sẽ được đưa về %1$s. Các ứng dụng theo ngôn ngữ hệ thống cũng sẽ đổi theo.</string>
+    <string name="system_language_confirm_title">Đổi ngôn ngữ hệ thống?</string>
+    <string name="system_language_confirm_message">Mọi ứng dụng theo ngôn ngữ hệ thống sẽ chuyển sang %1$s. Danh sách ngôn ngữ hiện tại được lưu lại trước để bạn có thể khôi phục.</string>
+    <string name="system_language_confirm_apply">Áp dụng</string>
+    <string name="system_language_picker_title">Ngôn ngữ hệ thống</string>
+    <string name="system_language_picker_note">Ngôn ngữ được chọn sẽ thành ngôn ngữ chính của hệ thống; các ngôn ngữ dự phòng hiện có được giữ nguyên.</string>
+    <string name="system_language_applied">Đã đặt ngôn ngữ hệ thống thành %1$s (%2$s)</string>
+    <string name="system_language_restored">Đã khôi phục ngôn ngữ hệ thống về %1$s</string>
+    <string name="system_language_pending_restart">Đã lưu %1$s (%2$s). Trên bản Android này, hệ thống áp dụng sau khi khởi động lại.</string>
+
+    <string name="app_language_title">Ngôn ngữ của Mamori</string>
+    <string name="app_language_summary">Chỉ đổi ngôn ngữ của ứng dụng này. Android lưu giá trị, Mamori không giữ bản sao.</string>
+    <string name="app_language_current">Hiện tại</string>
+    <string name="app_language_change">Chọn ngôn ngữ</string>
+    <string name="app_language_use_system">Dùng mặc định hệ thống</string>
+    <string name="app_language_unsupported">Bản Android này không có API ngôn ngữ theo ứng dụng nên không thể đặt ngôn ngữ tại đây.</string>
+    <string name="app_language_applied">Mamori đang dùng %1$s</string>
+    <string name="app_language_cleared">Mamori đã theo ngôn ngữ hệ thống trở lại</string>
+    <string name="app_language_failed">Đổi ngôn ngữ thất bại: %1$s</string>
+    <string name="app_language_unverified">Chưa xác nhận được thay đổi: mong đợi %1$s, Android báo %2$s</string>
+
+    <string name="installed_apps_title">Ngôn ngữ ứng dụng</string>
+    <string name="installed_apps_summary">Các thiết lập ngôn ngữ riêng do Android lưu. Android chỉ cho phép ứng dụng đổi ngôn ngữ của chính nó, nên các ứng dụng khác chỉ đọc được.</string>
+    <string name="installed_apps_search">Tìm theo tên hoặc gói</string>
+    <string name="installed_apps_refresh">Làm mới danh sách ứng dụng</string>
+    <string name="installed_apps_restricted">Hệ thống giới hạn truy vấn ứng dụng đã cài nên một số ứng dụng bị ẩn.</string>
+    <string name="installed_apps_empty">Không tìm thấy ứng dụng nào dành cho người dùng.</string>
+    <string name="installed_apps_no_matches">Không có ứng dụng nào khớp tìm kiếm hoặc bộ lọc này.</string>
+    <string name="installed_apps_read_unsupported">Cần Android 15 để đọc ngôn ngữ của ứng dụng khác.</string>
+    <string name="installed_apps_read_available">Android cho phép đọc ngôn ngữ của ứng dụng khác trên máy này.</string>
+    <string name="installed_apps_read_denied">Android chặn đọc ngôn ngữ của ứng dụng khác (READ_APP_SPECIFIC_LOCALES chỉ dành cho ứng dụng hệ thống). Trạng thái được để là chưa biết thay vì đoán.</string>
+    <string name="installed_apps_self_hint">Các ứng dụng khác chỉ đọc: Android không có API công khai để đặt ngôn ngữ cho ứng dụng khác, nên Mamori mở phần cài đặt của ứng dụng đó thay vì giả vờ đã đổi.</string>
+    <string name="installed_apps_open_settings">Cài đặt ứng dụng</string>
+    <string name="app_locale_override">Tùy chỉnh: %1$s</string>
+    <string name="app_locale_not_readable">Chưa biết (không đọc được)</string>
+    <string name="app_locale_unavailable">Không đọc được trên bản Android này</string>
+    <string name="apps_filter_all">Tất cả</string>
+    <string name="apps_filter_overridden">Tùy chỉnh</string>
+    <string name="apps_filter_system_default">Mặc định</string>
+    <string name="system_default">Mặc định hệ thống</string>
+    <string name="language_picker_search">Tìm ngôn ngữ</string>
+    <string name="language_picker_note">Android chỉ chấp nhận những ngôn ngữ ứng dụng này khai báo.</string>
+    <string name="language_picker_empty">Không có ngôn ngữ nào khớp tìm kiếm.</string>
+
+    <string name="settings_language_manager_title">Quản lý ngôn ngữ</string>
+    <string name="settings_language_manager_summary">Ngôn ngữ hệ thống, khôi phục ngôn ngữ gốc và thiết lập riêng cho từng ứng dụng</string>
+    <string name="settings_language_manager_open">Mở</string>
+</resources>
